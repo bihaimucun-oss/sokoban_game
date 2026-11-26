@@ -32,8 +32,9 @@ LEVELS = [
 
 DIRECTIONS = {"w": (0, -1), "s": (0, 1), "a": (-1, 0), "d": (1, 0)}
 
+MAX_MOVES = [25, 40, 60]
 
-def load_level(rows):
+def load_level(rows, max_moves):
     walls, goals, boxes = set(), set(), set()
     player = None
     width = len(rows[0])
@@ -55,7 +56,8 @@ def load_level(rows):
     if player is None or not boxes or len(boxes) != len(goals):
         raise ValueError("プレイヤー1人、箱とゴールは同じ数が必要です")
     return {"walls": walls, "goals": goals, "boxes": boxes, "player": player,
-            "width": width, "height": len(rows), "moves": 0, "history": []}
+            "width": width, "height": len(rows), "moves": 0,
+            "max_moves": max_moves, "history": []}
 
 
 def draw_game(game):
@@ -76,7 +78,8 @@ def draw_game(game):
             else:
                 line += " "
         print(line)
-    print(f"移動回数: {game['moves']} | WASD: 移動 / U: 一手戻す / R: リスタート / Q: 終了")
+    remaining = game["max_moves"] - game["moves"]
+    print(f"移動回数: {game['moves']}/{game['max_moves']} (残り: {remaining}) | WASD: 移動 / U: 一手戻す / R: リスタート / Q: 終了")
 
 
 def inside(game, pos):
@@ -118,7 +121,7 @@ def is_cleared(game):
 
 def main():
     level_index = 0
-    game = load_level(LEVELS[level_index])
+    game = load_level(LEVELS[level_index], MAX_MOVES[level_index])
     while True:
         draw_game(game)
         if is_cleared(game):
@@ -128,16 +131,18 @@ def main():
                 print("全ステージクリア！")
                 break
             input("Enterを押して次へ...")
-            game = load_level(LEVELS[level_index])
+            game = load_level(LEVELS[level_index], MAX_MOVES[level_index])
             continue
+        if game["moves"] >= game["max_moves"]:
+            print("手数上限に達しました！ Uで戻すか、Rでリスタートしてください。")
         key = input("操作 > ").strip().lower()[:1]
         if key == "q":
             break
         if key == "r":
-            game = load_level(LEVELS[level_index])
+            game = load_level(LEVELS[level_index], MAX_MOVES[level_index])
         elif key == "u":
             undo(game)
-        else:
+        elif game["moves"] < game["max_moves"]:
             move_player(game, key)
 
 
