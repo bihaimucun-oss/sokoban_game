@@ -141,7 +141,10 @@ def main():
             game = load_level(LEVELS[level_index], MAX_MOVES[level_index])
             continue
         if game["moves"] >= game["max_moves"]:
-            print("手数上限に達しました！ Uで戻すか、Rでリスタートしてください。")
+            print("ゲームオーバー！ 手数切れのためステージをやり直します。")
+            input("Enterを押してリスタート...")
+            game = load_level(LEVELS[level_index], MAX_MOVES[level_index])
+            continue
         key = input("操作 > ").strip().lower()[:1]
         if key == "q":
             break
@@ -149,7 +152,7 @@ def main():
             game = load_level(LEVELS[level_index], MAX_MOVES[level_index])
         elif key == "u":
             undo(game)
-        elif game["moves"] < game["max_moves"]:
+        else:
             move_player(game, key)
 
 
